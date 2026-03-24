@@ -1,0 +1,27 @@
+services:
+  engine:
+    image: thirdweb/engine:latest
+    ports:
+      - "3005:3005"
+    environment:
+      - ENCRYPTION_PASSWORD=a_long_secure_password_123
+      - THIRDWEB_API_SECRET_KEY=KpH8jL149PJLT4opV_LnWgWG7eXpgg3QA5fLLBrpN_GxlhQO3Xmcg5nE1fuHkx97YY0YcMnGn9SlANVPiCwXaw
+      - ADMIN_WALLET_ADDRESS=0x0A8167b13174Ea145A0116c1E38fd68AE4a393fe
+      - POSTGRES_CONNECTION_URL=postgresql://postgres:postgres@db:5432/postgres?sslmode=disable
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - engine_db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  engine_db_data:
