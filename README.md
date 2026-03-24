@@ -1,13 +1,52 @@
-🚀 Web3 Django Engine: Custodial Wallet PortalA high-performance, secure web platform that bridges traditional User Management (Web2) with Blockchain Infrastructure (Web3). This project uses a self-hosted Thirdweb Engine to automate the creation of custodial wallets for every registered user.🌟 Key FeaturesSecure Authentication: Email and Password registration with JWT (JSON Web Tokens) for stateless, secure API access.Automated Wallet Creation: Every new user account instantly triggers the generation of a unique EVM-compatible blockchain address.Self-Hosted Infrastructure: Full Web3 stack running via Docker, including Redis for transaction queuing and PostgreSQL for transaction history.Administrative CMS: A centralized dashboard to manage users, monitor system health, and oversee on-chain balances.Financial Operations: Built-in logic for users to Deposit, Withdraw, and Swap tokens directly from their account.🛠 Tech StackComponentTechnologyBackendPython 3.x, Django 4.x, Django REST FrameworkAuthSimpleJWT (JSON Web Tokens)BlockchainThirdweb Engine (Self-Hosted)DatabasePostgreSQL (Main DB & Engine DB)Cache/QueueRedisDevOpsDocker, Docker-Compose🏗 Infrastructure ArchitectureThe system consists of two primary layers:The Application Layer (Django): Handles user logic, the CMS, and triggers blockchain events via signals.The Engine Layer (Docker): A robust stack of three containers that handles private key management and blockchain communication.🚀 Getting Started1. PrerequisitesDocker & Docker-Compose installed.Python 3.10+A Thirdweb API Secret Key.2. Launching the Web3 EngineNavigate to the tw-engine directory and start the Docker stack:Bashdocker-compose up -d
-The engine will be available at http://localhost:3005.3. Backend ConfigurationUpdate your .env or settings.py with the following:THIRDWEB_ACCESS_TOKEN: Generated from the Engine Dashboard.ENGINE_URL: http://localhost:3005ADMIN_WALLET: 0x0A81...93fe4. Running the Django AppBashpip install -r requirements.txt
+# Django Web3 Wallet Engine
+
+A secure Django-based platform integrated with a self-hosted Thirdweb Engine to provide automated custodial blockchain wallets for users.
+
+## 🚀 Features
+
+- **User Authentication:** Email/password registration with JWT (JSON Web Token) security.
+- **Custodial Wallets:** Automatic on-chain wallet generation for every new user.
+- **Web3 Infrastructure:** Self-hosted Thirdweb Engine running via Docker (Postgres & Redis).
+- **Financial Operations:** Support for Deposits, Withdrawals, and Token Swaps.
+- **Administrative CMS:** Backend management system for user accounts and system health.
+
+## 🛠 Tech Stack
+
+- **Backend:** Django, Django REST Framework
+- **Blockchain:** Thirdweb Engine (Self-Hosted)
+- **Database:** PostgreSQL
+- **DevOps:** Docker, Docker-Compose
+- **Cache:** Redis
+
+## 📋 Infrastructure
+
+The project runs a synchronized Docker stack:
+
+1. **Engine:** Primary blockchain gateway (Port 3005).
+2. **DB:** Dedicated PostgreSQL instance for transaction metadata.
+3. **Redis:** High-speed queue for managing concurrent transactions.
+
+## ⚙️ Setup
+
+1. **Launch Engine:**
+   ```bash
+   docker-compose up -d
+   ```
+
+Configure Django:
+Add your THIRDWEB_API_SECRET_KEY and ADMIN_WALLET_ADDRESS to the environment settings.
+
+Run Migrations:
+
 python manage.py migrate
 python manage.py runserver
-📂 Project StructurePlaintext├── core/ # Django project settings
-├── wallets/ # Web3 logic & Thirdweb Signals
-│ ├── models.py # Links User IDs to Wallet Addresses
-│ ├── signals.py # Triggers wallet creation on Signup
-│ └── views.py # Deposit, Withdraw, & Swap logic
-├── cms/ # Administrative Management Panel
-├── tw-engine/ # Docker-compose & Engine Config
-└── requirements.txt # Python dependencies
-📝 Roadmap & Milestones[x] Milestone 1: User Authentication & JWT Integration.[x] Milestone 2: Self-Hosted Docker Engine Deployment.[ ] Milestone 3: Connection of Django CMS to Engine via Access Token.[ ] Milestone 4: Implementation of Gasless (Sponsored) Transactions.🛡 SecurityPrivate Keys: Never stored in the Django database. They remain encrypted within the Thirdweb Engine's secure vault.Authentication: All API endpoints are protected by JWT headers.Admin Access: The Engine is restricted to the specific ADMIN_WALLET_ADDRESS defined in the configuration.
+
+Milestones
+[x] Milestone 1: User Identity & JWT Authentication.
+
+[x] Milestone 2: Local Docker Engine Deployment & Validation.
+
+[ ] Milestone 3: Access Token integration and Automated Wallet creation.
+
+🔐 Security
+Private keys are never stored in the Django database; they are managed securely within the encrypted Thirdweb Engine vault.
