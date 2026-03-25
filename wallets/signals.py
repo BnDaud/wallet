@@ -10,7 +10,7 @@ from .services import create_thirdweb_wallet
 def create_user_wallet(sender , instance , created , **kwargs):
 
     if created:
-        wallet_data = create_thirdweb_wallet(instance.email)
+        wallet_data = create_thirdweb_wallet(instance.id)
 
         Wallet.objects.create(user = instance ,
                               address = wallet_data["address"],
