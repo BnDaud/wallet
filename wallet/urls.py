@@ -27,6 +27,7 @@ urlpatterns = [
 
     #custom url
       path("api/" , include("users.url")),
+      path("api/" , include("wallets.url")),
 
 
      # JWT
