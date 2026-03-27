@@ -10,7 +10,7 @@ from rest_framework import viewsets, permissions
 from .models import Transaction
 from .transactionsserial import TransactionSerializer
 
-
+from decimal import Decimal
 
 
 class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -33,41 +33,49 @@ class AlchemyWebhookView(APIView):
     permission_classes = []
 
     def post(self, request):
+        # 1. Print the raw data to Render Logs so we can see what Alchemy sent
+        print(f"DEBUG: Received Webhook Data: {request.data}")
+
         try:
-            # Alchemy sends data inside an 'event' object
-            data = request.data.get('event', {})
-            network = data.get('network')
-            activity = data.get('activity', [])
+            # Alchemy usually nests data under 'event'
+            event = request.data.get('event', {})
+            activity = event.get('activity', [])
+
+            if not activity:
+                print("DEBUG: No activity found in this webhook payload.")
+                return Response({"status": "no activity"}, status=status.HTTP_200_OK)
 
             for item in activity:
                 to_address = item.get('toAddress')
                 from_address = item.get('fromAddress')
-                amount = item.get('value')
-                asset = item.get('asset') # e.g., 'ETH', 'USDC'
+                raw_value = item.get('value')
+                asset = item.get('asset') 
                 tx_hash = item.get('hash')
 
-                # 1. Check if the receiving address belongs to a wallet in your database
-                try:
-                    # Make sure to compare addresses in lowercase
-                    wallet = Wallet.objects.get(address__iexact=to_address)
-                except Wallet.DoesNotExist:
-                    continue # Not our user, skip
+                # Case-insensitive search for the wallet
+                wallet = Wallet.objects.filter(address__iexact=to_address).first()
+                
+                if not wallet:
+                    print(f"DEBUG: Received transfer for {to_address}, but it's not in our DB.")
+                    continue 
 
-                # 2. Prevent duplicate entries (Alchemy sometimes retries webhooks)
                 if Transaction.objects.filter(tx_hash=tx_hash).exists():
+                    print(f"DEBUG: Transaction {tx_hash} already exists. Skipping.")
                     continue
 
-                # 3. Save the deposit!
-                Transaction.objects.create(
+                # Create the transaction
+                new_tx = Transaction.objects.create(
                     wallet=wallet,
                     tx_hash=tx_hash,
                     transaction_type='DEPOSIT',
-                    from_token=from_address, # Where it came from
-                    to_token=asset,          # What they deposited (ETH, USDC)
-                    amount=amount
+                    from_token=from_address,
+                    to_token=asset,
+                    amount=Decimal(str(raw_value)) if raw_value else 0
                 )
+                print(f"SUCCESS: Created Deposit Transaction for {wallet.user.email}")
 
             return Response({"status": "success"}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print(f"ERROR in Webhook: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  

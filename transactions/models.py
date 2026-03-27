@@ -1,5 +1,5 @@
 from django.db import models
-
+from wallets.models import Wallet
 class Transaction(models.Model):
     TRANSACTION_TYPES = (
         ('WITHDRAWAL', 'Withdrawal'),
@@ -7,7 +7,7 @@ class Transaction(models.Model):
         ('DEPOSIT', 'Deposit'),
     )
 
-    wallet = models.ForeignKey('wallets.Wallet', on_delete=models.CASCADE, related_name='transactions')
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='transactions')
     tx_hash = models.CharField(max_length=100, unique=True)
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
     from_token = models.CharField(max_length=100, null=True, blank=True)

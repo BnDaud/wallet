@@ -7,4 +7,6 @@ class Wallet(models.Model):
     private_key = models.CharField(max_length=255 , null = True) 
 
     def __str__(self):
-        return f"{self.user.username} - {self.address}"
+        if self.user:
+            return f"{self.user.email} - {self.address}"
+        return f"Unassigned Wallet - {self.address}"
