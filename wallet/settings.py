@@ -40,7 +40,7 @@ AUTH_USER_MODEL = "users.User"
 
 # Application definition
 
-my_app = ["users" , "rest_framework", 'wallets.apps.WalletsConfig',]
+my_app = ["users" , "rest_framework", 'wallets.apps.WalletsConfig',"transactions"]
 
 
 INSTALLED_APPS = [

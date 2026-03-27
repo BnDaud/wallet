@@ -12,6 +12,8 @@ from django.utils.decorators import method_decorator
 from .services import send_asset , ERC20_ABI , execute_swap
 from web3 import Web3
 import os
+from transactions.models import Transaction
+
 
 SUPPORTED_TOKENS = {
     "USDC": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", 
@@ -82,6 +84,18 @@ class WalletViewSet(ReadOnlyModelViewSet):
         tx_hash = send_asset(wallet, to_address, float(amount), token_address)
         
         if tx_hash:
+
+            
+            asset_withdrawn = token_address if token_address else "ETH"
+
+            Transaction.objects.create(
+                wallet=wallet,
+                tx_hash=tx_hash,
+                transaction_type='WITHDRAWAL',
+                from_token=asset_withdrawn, # What they sent
+                to_token=to_address,        # Where they sent it
+                amount=amount
+            )
             return Response({
                 "message": "Transaction sent!",
                 "tx_hash": tx_hash,
@@ -106,6 +120,15 @@ class WalletViewSet(ReadOnlyModelViewSet):
 
         try:
             tx_hash = execute_swap(wallet, from_token, to_token, float(amount))
+
+            Transaction.objects.create(
+                wallet=wallet,
+                tx_hash=tx_hash,
+                transaction_type='SWAP',
+                from_token=from_token,
+                to_token=to_token,
+                amount=amount
+            )
             return Response({
                 "message": "Swap successful!",
                 "tx_hash": tx_hash,
