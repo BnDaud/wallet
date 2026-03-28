@@ -1,11 +1,11 @@
 from .models import Wallet
 from rest_framework.serializers import ModelSerializer , SerializerMethodField
-
+from users.serial import UserSerial
 from .services import get_live_balance
 
 
 class WalletSerial(ModelSerializer):
-
+    user = UserSerial(read_only = True)
     balance = SerializerMethodField()
 
 
