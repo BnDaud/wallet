@@ -40,7 +40,7 @@ AUTH_USER_MODEL = "users.User"
 
 # Application definition
 
-my_app = ["users" , "rest_framework", 'wallets.apps.WalletsConfig',"transactions"]
+my_app = ["users" , "rest_framework", 'wallets.apps.WalletsConfig',"transactions",'corsheaders',]
 
 
 INSTALLED_APPS = [
@@ -56,12 +56,16 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
      'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # Add this here!
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
 
 ROOT_URLCONF = 'wallet.urls'
 
@@ -171,4 +175,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+
+CORS_ALLOW_ALL_ORIGINS = True
 
