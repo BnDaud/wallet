@@ -5,7 +5,8 @@ from cryptography.fernet import Fernet
 from decimal import Decimal
 from web3 import Web3
 from django.conf import settings
-import time
+import time , requests
+
 
 # The standard minimal ABI for interacting with any ERC-20 token
 ERC20_ABI = [
@@ -206,8 +207,7 @@ ROUTER_ABI = [
     }
 ]
 
-import time
-from web3 import Web3
+
 
 def execute_swap(wallet, from_token, to_token, amount, slippage_percentage=1.0):
     w3 = Web3(Web3.HTTPProvider(RPC_URL))
@@ -265,3 +265,35 @@ def execute_swap(wallet, from_token, to_token, amount, slippage_percentage=1.0):
     swap_hash = w3.eth.send_raw_transaction(signed_swap.raw_transaction)
     
     return w3.to_hex(swap_hash)
+
+
+
+
+
+def register_address_to_alchemy(new_address):
+    """
+    Tells Alchemy to automatically track this new address for deposits.
+    """
+    url = "https://dashboard.alchemy.com/api/update-webhook-addresses"
+    
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "X-Alchemy-Token": os.getenv("ALCHEMY_NOTIFY_TOKEN")
+    }
+    
+    payload = {
+        "webhook_id": os.getenv("ALCHEMY_WEBHOOK_ID"),
+        "addresses_to_add": [new_address],
+        "addresses_to_remove": []
+    }
+    print( "token = " , os.getenv("ALCHEMY_NOTIFY_TOKEN") , " hook = " , os.getenv("ALCHEMY_WEBHOOK_ID"))
+    try:
+        response = requests.patch(url, json=payload, headers=headers)
+        if response.status_code == 200:
+            print(f"SUCCESS: Alchemy is now tracking {new_address}")
+        else:
+            print(f"ERROR: Alchemy API failed - {response.text}")
+    except Exception as e:
+        print(f"ERROR: Could not reach Alchemy: {str(e)}")
+

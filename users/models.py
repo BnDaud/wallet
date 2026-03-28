@@ -32,6 +32,15 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     username = None
     
+    first_name = models.CharField(max_length=150 ,)
+    last_name = models.CharField(max_length=150)
+    
+    # 2. KYC Tracking
+    is_kyc_verified = models.BooleanField(default=False)
+    kyc_verified_key = models.CharField(max_length=255, blank=True, null=True)
+
+
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     is_created = models.DateTimeField(auto_now_add =True ,null= True)
