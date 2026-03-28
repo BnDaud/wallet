@@ -11,7 +11,7 @@ class WalletSerial(ModelSerializer):
 
     class Meta:
         model = Wallet
-        fields = ["address" , "balance"]
+        fields = ['id', 'user', 'address', 'balance'] # 'user' must be here!
 
 
     def get_balance(self , obj):
