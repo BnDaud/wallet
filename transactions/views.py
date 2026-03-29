@@ -66,7 +66,7 @@ class AlchemyWebhookView(APIView):
                 # Create the transaction
                 new_tx = Transaction.objects.create(
                     wallet=wallet,
-                    tx_hash=tx_hash,
+                    tx_hash=f"Deposit - {tx_hash}",
                     transaction_type='DEPOSIT',
                     from_token=from_address,
                     to_token=asset,

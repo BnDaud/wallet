@@ -51,21 +51,21 @@ class WalletViewSet(ReadOnlyModelViewSet):
         wallet = self.get_queryset().first()
         if not wallet:
             return Response({"Error": "Wallet Not Found"}, status=status.HTTP_404_NOT_FOUND)
-        
+
         w3 = Web3(Web3.HTTPProvider(os.getenv("RPC_URL")))
-        
+
         # 1. Fetch Native ETH Balance
         eth_balance_wei = w3.eth.get_balance(wallet.address, 'pending')
         balances = {
             "ETH": float(w3.from_wei(eth_balance_wei, 'ether'))
         }
-    
+
         # 2. Fetch ERC-20 Token Balances
         for symbol, token_address in SUPPORTED_TOKENS.items():
             # Prevent the loop from overwriting the Native ETH balance!
             if symbol == "ETH":
                 continue 
-                
+
             try:
                 contract = w3.eth.contract(address=token_address, abi=ERC20_ABI)
                 decimals = contract.functions.decimals().call()
@@ -73,11 +73,11 @@ class WalletViewSet(ReadOnlyModelViewSet):
                 balances[symbol] = float(raw_balance / (10 ** decimals))
             except Exception:
                 balances[symbol] = 0.0
-    
+
         serializer = self.get_serializer(wallet)
         data = serializer.data
         data['balances'] = balances # Append the live balances to the response
-    
+
         return Response(data)
 
 
@@ -108,7 +108,7 @@ class WalletViewSet(ReadOnlyModelViewSet):
 
             Transaction.objects.create(
                 wallet=wallet,
-                tx_hash=tx_hash,
+                tx_hash=f"Withdrawal - "+ {tx_hash},
                 transaction_type='WITHDRAWAL',
                 from_token=asset_withdrawn, # What they sent
                 to_token=to_address,        # Where they sent it
@@ -141,7 +141,7 @@ class WalletViewSet(ReadOnlyModelViewSet):
 
             Transaction.objects.create(
                 wallet=wallet,
-                tx_hash=tx_hash,
+                tx_hash=f"Swap - {tx_hash}",
                 transaction_type='SWAP',
                 from_token=from_token,
                 to_token=to_token,
