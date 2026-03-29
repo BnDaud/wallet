@@ -16,7 +16,7 @@ from transactions.models import Transaction
 
 SUPPORTED_TOKENS = {
     # --- Matches your Frontend list exactly ---
-    "ETH":  "0x0000000000000000000000000000000000000000",
+    #"ETH":  "0x0000000000000000000000000000000000000000",
     "USDC": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
     "UNI":  "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
     "WETH": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
@@ -59,9 +59,13 @@ class WalletViewSet(ReadOnlyModelViewSet):
         balances = {
             "ETH": float(w3.from_wei(eth_balance_wei, 'ether'))
         }
-
+    
         # 2. Fetch ERC-20 Token Balances
         for symbol, token_address in SUPPORTED_TOKENS.items():
+            # Prevent the loop from overwriting the Native ETH balance!
+            if symbol == "ETH":
+                continue 
+                
             try:
                 contract = w3.eth.contract(address=token_address, abi=ERC20_ABI)
                 decimals = contract.functions.decimals().call()
@@ -69,12 +73,14 @@ class WalletViewSet(ReadOnlyModelViewSet):
                 balances[symbol] = float(raw_balance / (10 ** decimals))
             except Exception:
                 balances[symbol] = 0.0
-
+    
         serializer = self.get_serializer(wallet)
         data = serializer.data
         data['balances'] = balances # Append the live balances to the response
-
+    
         return Response(data)
+
+
 
     @action(detail=False, methods=['post'])
     def withdraw(self, request):
